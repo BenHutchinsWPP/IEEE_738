@@ -71,6 +71,7 @@ Function day_of_year(ByVal month As Integer, ByVal day_of_month As Integer) As I
 End Function
 
 Function solar_heat_gain( _
+    ByVal solar_radiation As Double, _
     ByVal month As Integer, _
     ByVal day_of_month As Integer, _
     ByVal hour_of_day As Double, _
@@ -81,6 +82,12 @@ Function solar_heat_gain( _
     ByVal absorptivity As Double, _
     ByVal diameter As Double _
 ) As Double
+
+    If solar_radiation >= 0# Then
+        solar_heat_gain = absorptivity * solar_radiation * diameter
+        Exit Function
+    End If
+
     Dim pi As Double
     Dim day_of_yr As Integer
     Dim latitude_rad As Double
@@ -177,6 +184,7 @@ Function adjust_r( _
 End Function
 
 Function thermal_rating( _
+    ByVal solar_radiation As Double, _
     ByVal month As Integer, _
     ByVal day_of_month As Integer, _
     ByVal hour_of_day As Double, _
@@ -196,6 +204,12 @@ Function thermal_rating( _
     ByVal r_low As Double, _
     ByVal r_high As Double _
 ) As Double
+
+    If conductor_temperature < ambient_temperature Then
+        thermal_rating = 0
+        Exit Function
+    End If
+
     Dim qc As Double, qr As Double, qs As Double, r As Double
     
     ' Calculate convective heat loss
@@ -205,7 +219,7 @@ Function thermal_rating( _
     qr = radiated_heat_loss(ambient_temperature, conductor_temperature, emissivity, diameter)
     
     ' Calculate solar heat gain
-    qs = solar_heat_gain(month, day_of_month, hour_of_day, latitude_deg, line_azimuth_deg, elevation, atmosphere_clear, absorptivity, diameter)
+    qs = solar_heat_gain(solar_radiation, month, day_of_month, hour_of_day, latitude_deg, line_azimuth_deg, elevation, atmosphere_clear, absorptivity, diameter)
     
     ' Adjust resistance
     r = adjust_r(conductor_temperature, t_low, t_high, r_low, r_high)
@@ -214,6 +228,189 @@ Function thermal_rating( _
     thermal_rating = Sqr((qc + qr - qs) / r)
 End Function
 
+Function calculated_temperature( _
+    solar_radiation As Double, _
+    month As Integer, _
+    day_of_month As Integer, _
+    hour_of_day As Double, _
+    ambient_temperature As Double, _
+    wind_speed As Double, _
+    wind_angle_deg As Double, _
+    latitude_deg As Double, _
+    line_azimuth_deg As Double, _
+    elevation As Double, _
+    atmosphere_clear As Boolean, _
+    current As Double, _
+    tolerance As Double, _
+    absorptivity As Double, _
+    emissivity As Double, _
+    diameter As Double, _
+    t_low As Double, _
+    t_high As Double, _
+    r_low As Double, _
+    r_high As Double _
+) As Double
 
+    If current < 0# Then
+        calculated_temperature = 0
+        Exit Function
+    End If
+
+    Dim lower_bound As Double
+    Dim upper_bound As Double
+    Dim target_y As Double
+    Dim count As Integer
+    Dim mid As Double
+    Dim mid_y As Double
+
+    lower_bound = ambient_temperature
+    upper_bound = 256#
+    target_y = current
+    count = 0
+
+    ' Increase upper_bound until y(upper_bound) exceeds target_y
+    Do While thermal_rating(solar_radiation, month, day_of_month, hour_of_day, _
+                           ambient_temperature, wind_speed, wind_angle_deg, _
+                           latitude_deg, line_azimuth_deg, elevation, atmosphere_clear, _
+                           upper_bound, absorptivity, emissivity, diameter, _
+                           t_low, t_high, r_low, r_high) < target_y
+        upper_bound = upper_bound * 2
+        count = count + 1
+    Loop
+
+    ' Bisection search with known upper_bound and lower_bound
+    Do While upper_bound - lower_bound > tolerance
+        mid = (lower_bound + upper_bound) / 2
+        mid_y = thermal_rating(solar_radiation, month, day_of_month, hour_of_day, _
+                              ambient_temperature, wind_speed, wind_angle_deg, _
+                              latitude_deg, line_azimuth_deg, elevation, atmosphere_clear, _
+                              mid, absorptivity, emissivity, diameter, _
+                              t_low, t_high, r_low, r_high)
+
+        If mid_y < target_y Then
+            lower_bound = mid
+        Else
+            upper_bound = mid
+        End If
+        count = count + 1
+    Loop
+
+    ' Output the number of iterations to the immediate window (debugging purposes)
+    ' Debug.Print "Iterations Taken: " & count
+
+    ' Return the midpoint of the final range
+    calculated_temperature = (lower_bound + upper_bound) / 2
+
+End Function
+
+Function conductor_temperature_rise( _
+    solar_radiation As Double, _
+    month As Integer, _
+    day_of_month As Integer, _
+    hour_of_day As Double, _
+    ambient_temperature As Double, _
+    wind_speed As Double, _
+    wind_angle_deg As Double, _
+    latitude_deg As Double, _
+    line_azimuth_deg As Double, _
+    elevation As Double, _
+    atmosphere_clear As Boolean, _
+    conductor_temperature As Double, _
+    current As Double, _
+    time_step As Double, _
+    steps As Integer, _
+    absorptivity As Double, _
+    emissivity As Double, _
+    diameter As Double, _
+    t_low As Double, _
+    t_high As Double, _
+    r_low As Double, _
+    r_high As Double, _
+    heat_capacity As Double _
+) As Double
+
+    If conductor_temperature < ambient_temperature Then
+        conductor_temperature_rise = 0
+        Exit Function
+    End If
+
+    Dim qc As Double
+    Dim qr As Double
+    Dim qs As Double
+    Dim r As Double
+    Dim delta_t As Double
+    Dim final_temperature As Double
+    Dim i As Integer
+
+    final_temperature = conductor_temperature
+
+    For i = 1 To steps
+        qc = convective_heat_loss(ambient_temperature, wind_speed, wind_angle_deg, elevation, final_temperature, diameter)
+        qr = radiated_heat_loss(ambient_temperature, final_temperature, emissivity, diameter)
+        qs = solar_heat_gain(solar_radiation, month, day_of_month, hour_of_day, latitude_deg, line_azimuth_deg, elevation, atmosphere_clear, absorptivity, diameter)
+        r = adjust_r(final_temperature, t_low, t_high, r_low, r_high)
+        delta_t = (r * (current ^ 2) + qs - qc - qr) * time_step / heat_capacity
+        final_temperature = final_temperature + delta_t
+    Next i
+
+    conductor_temperature_rise = final_temperature - conductor_temperature
+
+End Function
+
+Function transient_rating( _
+    solar_radiation As Double, month As Integer, day_of_month As Integer, hour_of_day As Double, ambient_temperature As Double, _
+    wind_speed As Double, wind_angle_deg As Double, latitude_deg As Double, line_azimuth_deg As Double, elevation As Double, _
+    atmosphere_clear As Boolean, conductor_temperature As Double, conductor_temperature_max As Double, time_step As Double, steps As Integer, _
+    tolerance As Double, absorptivity As Double, emissivity As Double, diameter As Double, t_low As Double, _
+    t_high As Double, r_low As Double, r_high As Double, heat_capacity As Double _
+) As Double
+
+    If conductor_temperature_max < conductor_temperature Then
+        transient_rating = 0
+        Exit Function
+    End If
+
+    Dim lower_bound As Double
+    Dim upper_bound As Double
+    Dim target_y As Double
+    Dim mid As Double
+    Dim mid_y As Double
+
+    lower_bound = 0#
+    upper_bound = 4096#
+    target_y = conductor_temperature_max - conductor_temperature
+
+    ' Increase upper_bound until y(upper_bound) exceeds target_y
+    Do While conductor_temperature_rise(solar_radiation, month, day_of_month, _
+                                        hour_of_day, ambient_temperature, wind_speed, _
+                                        wind_angle_deg, latitude_deg, line_azimuth_deg, _
+                                        elevation, atmosphere_clear, conductor_temperature, _
+                                        upper_bound, time_step, steps, absorptivity, _
+                                        emissivity, diameter, t_low, t_high, r_low, _
+                                        r_high, heat_capacity) < target_y
+        upper_bound = upper_bound * 2
+    Loop
+
+    ' Bisection search with known upper_bound and lower_bound
+    Do While upper_bound - lower_bound > tolerance
+        mid = (lower_bound + upper_bound) / 2
+        mid_y = conductor_temperature_rise(solar_radiation, month, day_of_month, _
+                                          hour_of_day, ambient_temperature, wind_speed, _
+                                          wind_angle_deg, latitude_deg, line_azimuth_deg, _
+                                          elevation, atmosphere_clear, conductor_temperature, _
+                                          mid, time_step, steps, absorptivity, _
+                                          emissivity, diameter, t_low, t_high, r_low, _
+                                          r_high, heat_capacity)
+
+        If mid_y < target_y Then
+            lower_bound = mid
+        Else
+            upper_bound = mid
+        End If
+    Loop
+
+    transient_rating = (lower_bound + upper_bound) / 2
+
+End Function
 
 
