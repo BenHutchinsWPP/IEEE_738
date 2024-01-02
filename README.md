@@ -30,7 +30,7 @@ We will need to identify these values:
 - $q_c$: `convective_heat_loss()`, Convection heat loss rate per unit length ($\frac{W}{ft}$)
 - $q_r$: `radiated_heat_loss()`, Radiated heat loss rate per unit length ($\frac{W}{ft}$)
 - $q_s$: `solar_heat_gain()`, Heat gain rate from sun ($\frac{W}{ft}$)
-- $R$: Resistance (Ohms/ft) at the conductor's present temperature
+- $R$: `adjust_r()` Resistance (Ohms/ft) at the conductor's present temperature
 
 There are two main functions available in this library for computing things in steady-state:
 - `thermal_rating()`: Calculates Current (Amps) given Conductor Temperature
@@ -99,43 +99,43 @@ To compute current (based on 1a) we need to first compute:
 - $q_c$: `convective_heat_loss()`
 - $q_r$: `radiated_heat_loss()`
 - $q_s$: `solar_heat_gain()`
-- $R$: Resistance (Ohms/ft)
+- $R$: `adjust_r()` Resistance (Ohms/ft)
 
 $q_c$: `convective_heat_loss()`
 - Limit `wind_angle_deg` ($\phi$) to between 0-90 degrees.
 - $\phi = 90-abs(mod(\phi,180) - 90)$
 - $T_{film} = \frac{T_s+T_a}{2}$  (6)
-- $T_{film} = 70.0$ (degrees C)
+- $T_{film}$ = 70.0 (degrees C)
 - $\mu_f=\frac{0.00353 \cdot (T_{film} + 273.15)^{1.5}}{(T_{film} + 383.4)}$ (13b Dynamic viscosity of air)
-- $\mu_f=0.049490198353345498$ (lb/ft - hour) 
+- $\mu_f$ = 0.049490198353345498 (lb/ft - hour) 
 - $\rho_f=\frac{0.080695 - 2.901 \cdot 10^{-6} \cdot H_e + 3.7 \cdot 10^{-11} \cdot H_e^2}{1 + 0.00367 \cdot T_{film}}$ (14b Air density)
-- $\rho_f=0.064201607128649862$ (lb/ft^3)
+- $\rho_f$ = 0.064201607128649862 (lb/ft^3)
 - $K_{angle} = 1.194 - \cos(\phi) + 0.194 \cdot \cos(2\phi) + 0.368 \cdot \sin(2\phi)$ (4a Section 4.4.3.1, page 11)
-- $K_{angle}=1.0$ 
+- $K_{angle}$ = 1.0
 - $N_{Re} = \frac{D_0 \cdot \rho_f \cdot V_w}{\mu_f}$ (2c Reynolds Number)
   - Note: Because Dynamic viscosity is in lb/ft-hr, we must convert wind speed to ft/hr.
-- $N_{Re}=862.41780564933526$
+- $N_{Re}$ = 862.41780564933526
 - $k_f = 7.388 \cdot 10^{-3} + 2.279 \cdot 10^{-5} \cdot T_{\text{film}} - 1.343 \cdot 10^{-9} \cdot T_{\text{film}}^2$ (W / ft * Degrees C) (15b Thermal conductivity of air)
-- $k_f = 0.0089767192999999998$
+- $k_f$ = 0.0089767192999999998
 - $q_{c0} = 1.825 \cdot \rho_f^{0.5} \cdot D_0^{0.75} \cdot (T_s - T_a)^{1.25}$  (W/ft) (Section 4.4.3.2, 5b, page 12, Natural Convection)
-- $q_{c0}=12.934324909542022$
+- $q_{c0}$ = 12.934324909542022
 - $q_{c1} = K_{\text{angle}} \left[ 1.01 + 1.35 \cdot N_{\text{Re}}^{0.52} \right] \cdot k_f \cdot (T_s - T_a)$ (3a Forced convection - correct at low winds)
-- $q_{c1}=24.988191839976331$ (W/ft)
-- $q_{c2} = K_{\text{angle}} \cdot 0.0754 \cdot N_{\text{Re}}^{0.6} \cdot k_f \cdot (T_s - T_a)$ (3b Forced convection - correct at high winds)
-- $q_{c2}=23.446113878522919$ (W/ft)
-- $q_c = Max(q_{c0},q_{c1},q_{c2})=24.988191839976331$ (W/ft)
+- $q_{c1}$ = 24.988191839976331 (W/ft)
+- $q_{c2} = K_{angle} \cdot 0.0754 \cdot N_{Re}^{0.6} \cdot k_f \cdot (T_s - T_a)$ (3b Forced convection - correct at high winds)
+- $q_{c2}$ = 23.446113878522919 (W/ft)
+- $q_c = Max(q_{c0},q_{c1},q_{c2})$ = 24.988191839976331 (W/ft)
 
 $q_r$: `radiated_heat_loss()`
-- $q_r = 1.656 \cdot D_0 \cdot \varepsilon \cdot \left[ \left( \frac{T_s + 273}{100} \right)^4 - \left( \frac{T_a + 273}{100} \right)^4 \right] \quad $ (Section 4.4.4, eq 7a 7b, page 12)
+- $q_r = 1.656 \cdot D_0 \cdot \varepsilon \cdot [(\frac{T_s + 273}{100})^4 -  (\frac{T_a + 273}{100})^4] $ (Section 4.4.4, eq 7a 7b, page 12)
   - Note: PJM's ratings calculations use 273.15 here instead of 273.
-- $q_r=11.937464384798224$ (W/ft)
+- $q_r$ = 11.937464384798224 (W/ft)
 
 $q_s$: `solar_heat_gain()`
 - If solar radiation ($Q_{se}$) is already specified, immediately return $q_s = \alpha \cdot Q_{se} \cdot D_0$.
 - $N = (31 + 28 + 31 + 30 + 31) + 10$ (Day of Year)
-- $N = 161$
+- $N$ = 161
 - $\omega = (Time - 12.0) * 15.0$ (Hour angle relative to noon, e.g. at 11AM, Time = 11 and the Hour angle= –15 deg)
-- $\omega=-15$ (Degrees)
+- $\omega$ = -15 (Degrees)
 - Table 3 - Atmosphere condition coefficients
   - Selected column for "Clear" skies
 
@@ -160,22 +160,22 @@ $q_s$: `solar_heat_gain()`
 |$H_e > 0 ft$|1.00|
 
 - $\delta = 23.46 \cdot \sin \left[ \frac{284 + N}{365} \cdot 360 \right]$ (16b - 23.4583 was taken from Annex A for higher precision)
-- $\delta = 0.40177098151385465$ (rad)
+- $\delta$ = 0.40177098151385465 (rad)
 - $H_c = \arcsin \left[ \cos(\text{Lat}) \cdot \cos(\delta) \cdot \cos(\omega) + \sin(\text{Lat}) \cdot \sin(\delta) \right]
 $ (16a - Altitude of the sun)
-- $H_c=74.890380558702674$ (deg)
+- $H_c$ = 74.890380558702674 (deg)
 - $Q_s = A + B H_c + C H_c^2 + D H_c^3 + E H_c^4 + F H_c^5 + G H_c^6$ (18 - Total solar and sky radiated heat intensity)
-- $Q_s=95.43742328317225$ (w/ft^2)
+- $Q_s$ = 95.43742328317225 (w/ft^2)
 - $K_{solar}=A+B \cdot H_e + C \cdot H_e^2$ (20 - Elevation correction factor)
   - (A=1, B=3.5e-5, C=1.0e-9)
-- $K_{solar}=1.0$
+- $K_{solar}$ = 1.0
 - $Q_{se}=max(q_s,0) * mult * k_{solar}$ (8 - Total solar and sky radiated heat intensity corrected for elevation)
   - Note: $q_s$ can come out negative when the sun is below the horizon. But the lowest solar heating you can have is 0. Therefore we take the max of $q_s$ and 0 here.
-- $Q_{se}=95.43742328317225$ (w/ft^2)
+- $Q_{se}$ = 95.43742328317225 (w/ft^2)
 - $\chi = \frac{\sin(\omega)}{\sin(\text{Lat}) \cdot \cos(\omega) - \cos(\text{Lat}) \cdot \tan(\delta)}$ (17b)
-- $\chi = -2.2505218045476418$ (rad)
+- $\chi$ = -2.2505218045476418 (rad)
 - Table 2 - Solar azimuth constant, C, as a function of “Hour angle,” ω, and Solar Azimuth variable,χ 
-    - $C=180$
+    - $C$ = 180
 
 |“Hour angle”, ω, degrees|C if χ ≥ 0 degrees|C if χ < 0 degrees|
 |-|-|-|
@@ -183,15 +183,15 @@ $ (16a - Altitude of the sun)
 |0 ≤ ω < 180|180|360|
 
 - $Z_c=C+\arctan(\chi)$ (17a - Azimuth of the sun)
-- $Z_c=1.9889346021863228$ (rad)
+- $Z_c$ = 1.9889346021863228 (rad)
 - $\theta = \arccos [\cos(H_c) \cdot \cos(Z_c - Z_l)]$ (9 - Effective angle of incidence of the sun’s rays)
-- $\theta=1.330274712380765$ (rad)
+- $\theta$ = 1.330274712380765 (rad)
 - $q_s=\alpha \cdot Q_{se} \cdot \sin(\theta) \cdot D_0$ (8 - Rate of solar heat gain)
-- $q_s=6.8467122146222028$ (w/ft)
+- $q_s$ = 6.8467122146222028 (w/ft)
 
-$R$: Resistance (Ohms/ft)
+$R$: `adjust_r()` Resistance (Ohms/ft)
 - $R = \frac{R_{high} - R_{low}} {T_{high} - T_{low}} \cdot (T - T_{low}) + R_{low}$ (10 - Conductor electrical resistance)
-- $R = 0.000028447050000000004$ (Ohms / ft)
+- $R$ = 0.000028447050000000004 (Ohms / ft)
 
 Then, the resulting output is:
 
@@ -244,4 +244,6 @@ This routine takes the same parameters as `conductor_temperature_rise()`, except
 
 It utilizes the `conductor_temperature_rise()` routine, and performs a bi-section search on the final conductor current until reaching the desired final conductor temperature. 
 
+# Errata or To Do
+- When peer-checking rating methodologies against other utility computations, it was noted that [SouthWire Rate](https://www.southwire.com/swratepro) Lite v1.0.3 may or may not be taking into account the thermal heat capacity of the wire's core for transient rating calculations; however, we were unable to replicate the issue later-on. It might be a Heisenbug, or an error on our part when verifying the calculation. Leaving this note temporarily in case the bug re-appears.
 
