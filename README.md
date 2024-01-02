@@ -126,7 +126,7 @@ $q_c$: `convective_heat_loss()`
 - $q_c = Max(q_{c0},q_{c1},q_{c2})$ = 24.988191839976331 (W/ft)
 
 $q_r$: `radiated_heat_loss()`
-- $q_r = 1.656 \cdot D_0 \cdot \varepsilon \cdot [(\frac{T_s + 273}{100})^4 -  (\frac{T_a + 273}{100})^4] $ (Section 4.4.4, eq 7a 7b, page 12)
+- $q_r = 1.656 \cdot D_0 \cdot \varepsilon \cdot [(\frac{T_s + 273}{100})^4 - (\frac{T_a + 273}{100})^4]$ (Section 4.4.4, eq 7a 7b, page 12)
   - Note: PJM's ratings calculations use 273.15 here instead of 273.
 - $q_r$ = 11.937464384798224 (W/ft)
 
