@@ -285,6 +285,11 @@ pub fn thermal_rating(
 
     let r = adjust_r(conductor_temperature,t_low,t_high,r_low,r_high);
 
+    if qc + qr - qs < 0 {
+        // The ambient temperature + solar heating, has brought the conductor to a higher temperature than the specified MOT "conductor_temperature"
+        return 0.0;
+    }
+
     ((qc + qr - qs) / r).powf(0.5)
 }
 

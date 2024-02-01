@@ -224,6 +224,12 @@ Function thermal_rating( _
     ' Adjust resistance
     r = adjust_r(conductor_temperature, t_low, t_high, r_low, r_high)
     
+    If qc + qr - qs < 0 Then
+        ' The ambient temperature + solar heating, has brought the conductor to a higher temperature than the specified MOT "conductor_temperature"
+        thermal_rating = 0
+        Exit Function
+    End If
+    
     ' Calculate and return thermal rating
     thermal_rating = Sqr((qc + qr - qs) / r)
 End Function
