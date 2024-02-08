@@ -293,7 +293,7 @@ Function calculated_temperature( _
                               mid, absorptivity, emissivity, diameter, _
                               t_low, t_high, r_low, r_high)
 
-        If mid_y < target_y Then
+        If mid_y <= target_y Then
             lower_bound = mid
         Else
             upper_bound = mid

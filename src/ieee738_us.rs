@@ -285,7 +285,7 @@ pub fn thermal_rating(
 
     let r = adjust_r(conductor_temperature,t_low,t_high,r_low,r_high);
 
-    if qc + qr - qs < 0 {
+    if qc + qr - qs < 0.0 {
         // The ambient temperature + solar heating, has brought the conductor to a higher temperature than the specified MOT "conductor_temperature"
         return 0.0;
     }
@@ -348,28 +348,35 @@ pub fn calculated_temperature(
     let target_y: f64 = current;
 
     // Increase upper_bound until y(upper_bound) exceeds target_y or it becomes very large
-    while thermal_rating(
-        solar_radiation
-        ,month
-        ,day_of_month
-        ,hour_of_day
-        ,ambient_temperature
-        ,wind_speed
-        ,wind_angle_deg
-        ,latitude_deg
-        ,line_azimuth_deg
-        ,elevation
-        ,atmosphere_clear
-        ,upper_bound // Modified variable
-        ,absorptivity
-        ,emissivity
-        ,diameter
-        ,t_low
-        ,t_high
-        ,r_low
-        ,r_high
-    ) < target_y && upper_bound < f64::MAX / 2.0 {
-        upper_bound *= 2.0;
+    loop {
+        let thermal_rating_retval = thermal_rating(
+            solar_radiation
+            ,month
+            ,day_of_month
+            ,hour_of_day
+            ,ambient_temperature
+            ,wind_speed
+            ,wind_angle_deg
+            ,latitude_deg
+            ,line_azimuth_deg
+            ,elevation
+            ,atmosphere_clear
+            ,upper_bound // Modified variable
+            ,absorptivity
+            ,emissivity
+            ,diameter
+            ,t_low
+            ,t_high
+            ,r_low
+            ,r_high
+        );
+
+        if thermal_rating_retval < target_y && upper_bound < f64::MAX / 2.0 {
+            upper_bound *= 2.0;
+        }
+        else {
+            break;
+        }
     }
 
     // Bisection search with known upper_bound and lower_bound
@@ -397,7 +404,7 @@ pub fn calculated_temperature(
             ,r_high
         );
 
-        if mid_y < target_y {
+        if mid_y <= target_y {
             lower_bound = mid;
         } else {
             upper_bound = mid;
