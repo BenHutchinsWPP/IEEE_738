@@ -216,8 +216,8 @@ pub fn solar_heat_gain(
 /// * `conductor_temperature` - T_s: Conductor Surface Temperature (C)
 /// * `t_low` - Low Temperature, Degrees C
 /// * `t_high` - High Temperature, Degrees C
-/// * `r_low` - Resistance at Low Temperature, Ohms
-/// * `r_high` - Resistance at High Temperature, Ohms
+/// * `r_low` - Resistance at Low Temperature, Ohms / ft
+/// * `r_high` - Resistance at High Temperature, Ohms / ft
 pub fn adjust_r(
     conductor_temperature: f64, 
     t_low: f64, 
@@ -249,8 +249,8 @@ pub fn adjust_r(
 /// * `diameter` - D_0: Outer diameter of the conductor (ft)
 /// * `t_low` - Low Temperature, Degrees C
 /// * `t_high` - High Temperature, Degrees C
-/// * `r_low` - Resistance at Low Temperature, Ohms
-/// * `r_high` - Resistance at High Temperature, Ohms
+/// * `r_low` - Resistance at Low Temperature, Ohms / ft
+/// * `r_high` - Resistance at High Temperature, Ohms / ft
 pub fn thermal_rating(
     solar_radiation: f64,
     month: i32,
@@ -315,8 +315,8 @@ pub fn thermal_rating(
 /// * `diameter` - D_0: Outer diameter of the conductor (ft)
 /// * `t_low` - Low Temperature, Degrees C
 /// * `t_high` - High Temperature, Degrees C
-/// * `r_low` - Resistance at Low Temperature, Ohms
-/// * `r_high` - Resistance at High Temperature, Ohms
+/// * `r_low` - Resistance at Low Temperature, Ohms / ft
+/// * `r_high` - Resistance at High Temperature, Ohms / ft
 pub fn calculated_temperature(
     solar_radiation: f64,
     month: i32,
@@ -431,8 +431,8 @@ pub fn calculated_temperature(
 /// * `diameter` - D_0: Outer diameter of the conductor (ft)
 /// * `t_low` - Low Temperature, Degrees C
 /// * `t_high` - High Temperature, Degrees C
-/// * `r_low` - Resistance at Low Temperature, Ohms
-/// * `r_high` - Resistance at High Temperature, Ohms
+/// * `r_low` - Resistance at Low Temperature, Ohms / ft
+/// * `r_high` - Resistance at High Temperature, Ohms / ft
 /// * `heat_capacity` - m*Cp: Total heat capacity of conductor (J/(ft-°C))
 pub fn conductor_temperature_rise(
     solar_radiation: f64,
@@ -501,8 +501,8 @@ pub fn conductor_temperature_rise(
 /// * `diameter` - D_0: Outer diameter of the conductor (ft)
 /// * `t_low` - Low Temperature, Degrees C
 /// * `t_high` - High Temperature, Degrees C
-/// * `r_low` - Resistance at Low Temperature, Ohms
-/// * `r_high` - Resistance at High Temperature, Ohms
+/// * `r_low` - Resistance at Low Temperature, Ohms / ft
+/// * `r_high` - Resistance at High Temperature, Ohms / ft
 /// * `heat_capacity` - m*Cp: Total heat capacity of conductor (J/(ft-°C))
 pub fn transient_rating(
     solar_radiation: f64,
