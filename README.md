@@ -4,6 +4,8 @@ This repository is intended to host files which will help utilities with calcula
 
 WARNING: No warranty is provided for this code-base. It is provided as-is, and should have engineer and code-review prior to direct usage. 
 
+## Useful Resources
+
 Some useful links include:
 - [FERC 881 Python Demo](https://www.ferc.gov/media/demonstration-potential-datacalculation-workflows-under-ferc-order-no-881s-ambient-adjusted)
 - [Tomas Barton IEEE 738 Python Code](https://github.com/tommz9/pylinerating)
@@ -11,6 +13,18 @@ Some useful links include:
 - [FERC Order 881](https://www.ferc.gov/media/e-1-rm20-16-000)
 - [IEEE 738 Standard](https://standards.ieee.org/ieee/738/4997/)
 - [CIGRE TB 299](https://e-cigre.org/publication/299-guide-for-the-selection-of-weather-parameters-for-bare-overhead-conductor-ratings)
+
+Other related tools include: 
+- [PJM Overhead Conductor Ratings Sheet](https://www.pjm.com/-/media/planning/design-engineering/maac-standards/oht-cond-rating-spreadsheet-2023-rev-draft.ashx)
+- [tommz9/pylinerating](https://github.com/tommz9/pylinerating)
+- [afsneto/IEEE-TL-Thermal-Calculations](https://github.com/afsneto/IEEE-TL-Thermal-Calculations)
+- [cwebber314/ieee738_temperature_rise_breaker.ipynb](https://gist.github.com/cwebber314/40ebcdf71e4960e2b7ec90ae1b4cb70d)
+- [saulcg/IEEE_738-2012](https://github.com/saulcg/IEEE_738-2012)
+- [kersulis/LineThermalModel.jl](https://github.com/kersulis/LineThermalModel.jl)
+- [stevenblair/ieee738matlab](https://github.com/stevenblair/ieee738matlab)
+- [MATLAB IEEE std 738:Calculation of current-temperature relationship](https://www.mathworks.com/matlabcentral/fileexchange/96494-ieee-std-738-calculation-of-current-temperature-relationship?s_tid=mwa_osa_a)
+- [SouthWire Rate](https://overheadtransmission.southwire.com/purchase-swrate-pro-software/)
+
 
 # IEEE 738 Rust Library
 An equivalent version of the code has been produced in Rust, to be more useful in other compiled applications.
