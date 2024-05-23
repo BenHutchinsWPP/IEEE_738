@@ -12,6 +12,11 @@ Some useful links include:
 - [IEEE 738 Standard](https://standards.ieee.org/ieee/738/4997/)
 - [CIGRE TB 299](https://e-cigre.org/publication/299-guide-for-the-selection-of-weather-parameters-for-bare-overhead-conductor-ratings)
 
+# IEEE 738 Rust Library
+An equivalent version of the code has been produced in Rust, to be more useful in other compiled applications.
+
+Please find the rust library here: [BenHutchinsWPP/IEEE_738_Rust](https://github.com/BenHutchinsWPP/IEEE_738_Rust)
+
 # IEEE 738 Ratings Calculations
 
 ## Steady State
